@@ -1,11 +1,12 @@
+import React, { Component } from 'react';
 import {
   SearchForm,
   Header,
   SearchFormButton,
   SearchFormButtonLabel,
   SearchFormInput,
+  Icon,
 } from './Searchbar.styled';
-import React, { Component } from 'react';
 
 class Searchbar extends Component {
   state = {
@@ -28,6 +29,7 @@ class Searchbar extends Component {
       <Header>
         <SearchForm onSubmit={this.handleSubmit}>
           <SearchFormButton>
+            <Icon />
             <SearchFormButtonLabel>Search</SearchFormButtonLabel>
           </SearchFormButton>
 

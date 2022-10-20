@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import ImageGallery from './ImageGallery';
 import Searchbar from './Searchbar';
-
 import Button from './Button';
 import Loader from './Loader';
 import picturesApi from 'api';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class App extends Component {
   state = {
@@ -23,25 +24,20 @@ class App extends Component {
     try {
       const pictures = await picturesApi(value, this.state.page);
 
-      if (pictures.totalHits !== 0) {
-        this.loadedPictures(pictures.hits.length);
+      if (pictures.hits.length !== 0) {
+        this.setState({ loadedHits: pictures.hits.length });
         this.setState({ totalHits: pictures.totalHits });
         this.setState({ pictures: pictures.hits });
         this.setState({ pictureValue: value });
-        this.setState(prevState => ({ page: prevState.page + 1 }));
+        this.updatePage();
         this.setState({ status: 'resolved' });
         return;
       }
       this.setState({ status: 'rejected' });
       return;
     } catch (error) {
-      console.log(error);
       this.setState({ status: 'rejected' });
     }
-  };
-
-  loadedPictures = count => {
-    this.setState(prevState => ({ loadedHits: prevState.loadedHits + count }));
   };
 
   handleUpdate = async () => {
@@ -56,7 +52,7 @@ class App extends Component {
         this.setState(prevState => ({
           pictures: [...prevState.pictures, ...pictures.hits],
         }));
-        this.setState(prevState => ({ page: prevState.page + 1 }));
+        this.updatePage();
         this.setState({ status: 'resolved' });
         return;
       }
@@ -77,6 +73,27 @@ class App extends Component {
     }
   };
 
+  updatePage = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
+  };
+
+  loadedPictures = count => {
+    this.setState(prevState => ({ loadedHits: prevState.loadedHits + count }));
+  };
+
+  notify = () => {
+    toast.error('Sorry we dont find pictures by your Request', {
+      position: 'top-center',
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'colored',
+    });
+  };
+
   renderByStatus = () => {
     if (
       this.state.status === 'resolved' ||
@@ -95,7 +112,8 @@ class App extends Component {
     }
 
     if (this.state.status === 'rejected') {
-      return <p>Упс, что то пошло не так...</p>;
+      this.notify();
+      return;
     }
   };
 
@@ -106,6 +124,7 @@ class App extends Component {
           pictureValue={this.state.pictureValue}
           onSubmit={this.handleSubmit}
         />
+        <ToastContainer />
         {this.renderByStatus()}
       </>
     );
