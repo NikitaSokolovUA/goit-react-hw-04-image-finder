@@ -1,12 +1,18 @@
 import { LoadMoreBtn } from './Button.styled';
 import PropTypes from 'prop-types';
+import Loader from 'components/Loader';
 
-const Button = ({ onClick }) => {
-  return <LoadMoreBtn onClick={() => onClick()}>LoadMore</LoadMoreBtn>;
+const Button = ({ onClick, status }) => {
+  return status === 'resolvAndPending' ? (
+    <Loader />
+  ) : (
+    <LoadMoreBtn onClick={() => onClick()}>LoadMore</LoadMoreBtn>
+  );
 };
 
 export default Button;
 
 Button.proptype = {
   onClick: PropTypes.func.isRequired,
+  status: PropTypes.string.isRequired,
 };

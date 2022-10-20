@@ -73,12 +73,7 @@ class App extends Component {
           this.state.status === 'resolvAndPending') && (
           <>
             <ImageGallery pictures={this.state.pictures} />
-
-            {this.state.status === 'resolvAndPending' ? (
-              <Loader />
-            ) : (
-              <Button onClick={this.loadMore} />
-            )}
+            <Button onClick={this.loadMore} status={this.state.status} />
           </>
         )}
       </>
