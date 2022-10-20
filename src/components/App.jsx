@@ -61,10 +61,7 @@ class App extends Component {
 
     return (
       <>
-        <Searchbar
-          pictureValue={this.state.pictureValue}
-          onSubmit={this.handleSubmit}
-        />
+        <Searchbar onSubmit={this.handleSubmit} />
         <ToastContainer />
 
         {this.state.status === 'pending' && <Loader />}

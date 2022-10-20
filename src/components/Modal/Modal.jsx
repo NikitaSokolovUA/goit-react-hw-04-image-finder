@@ -14,8 +14,6 @@ class Modal extends Component {
   closeModalOnEscPush = e => {
     const KEY_CODE_ESCAPE = 'Escape';
 
-    console.log(e.code);
-
     if (e.code === KEY_CODE_ESCAPE) {
       this.props.toggleModal();
     }
@@ -41,5 +39,6 @@ class Modal extends Component {
 export default Modal;
 
 Modal.propTypes = {
+  toggleModal: PropTypes.func.isRequired,
   largeImageURL: PropTypes.string.isRequired,
 };
