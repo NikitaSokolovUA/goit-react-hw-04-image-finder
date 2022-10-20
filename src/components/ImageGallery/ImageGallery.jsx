@@ -23,8 +23,8 @@ ImageGallery.propTypes = {
   pictures: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
-      webformatURL: PropTypes.string.isRequired,
-      largeImageURL: PropTypes.string.isRequired,
+      webformatURL: PropTypes.string,
+      largeImageURL: PropTypes.string,
     })
   ),
 };

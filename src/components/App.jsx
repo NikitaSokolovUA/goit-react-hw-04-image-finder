@@ -23,11 +23,18 @@ class App extends Component {
         ? this.setState({ status: 'pending' })
         : this.setState({ status: 'resolvAndPending' });
 
+      console.log(
+        this.state.pictures.length === 0
+          ? this.setState({ status: 'pending' })
+          : this.setState({ status: 'resolvAndPending' })
+      );
+
       try {
         const picturesArray = await picturesApi(pictureValue, page);
 
         if (picturesArray.length === 0 && pictures.length === 0) {
           this.setState({ status: 'rejected' });
+          notification();
           return;
         }
 
@@ -55,10 +62,6 @@ class App extends Component {
   };
 
   render() {
-    if (this.state.status === 'rejected') {
-      notification();
-    }
-
     return (
       <>
         <Searchbar onSubmit={this.handleSubmit} />
