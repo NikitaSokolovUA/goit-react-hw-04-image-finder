@@ -19,8 +19,8 @@ const ImageGallery = ({ pictures }) => {
         <ImageGalleryItem
           key={id}
           smallImage={webformatURL}
-          largeImage={largeImageURL}
-        />
+          largeImageURL={largeImageURL}
+        ></ImageGalleryItem>
       ))}
     </ImageGallerys>
   );

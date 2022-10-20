@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import ImageGallery from './ImageGallery';
 import Searchbar from './Searchbar';
-import axios from 'axios';
+
 import Button from './Button';
 import Loader from './Loader';
+import picturesApi from 'api';
 
 class App extends Component {
   state = {
@@ -17,25 +18,11 @@ class App extends Component {
     this.setState({ page: 1 });
     this.setState({ status: 'pending' });
 
-    const BASE_URL = 'https://pixabay.com/api/';
-    const API_KEY = '29773824-39fd0ee837bb8082420a788ac';
-    const options = {
-      params: {
-        key: API_KEY,
-        q: value,
-        image_type: 'photo',
-        orientation: 'horizontal',
-        per_page: 12,
-        page: this.state.page,
-      },
-    };
-
     try {
-      const responce = await axios.get(`${BASE_URL}`, options);
-      console.log(responce);
-      const pictures = await responce.data;
+      const pictures = await picturesApi(value, this.state.page);
 
       if (pictures.total !== 0) {
+        console.log(pictures.total);
         this.setState({ pictures: pictures.hits });
         this.setState({ pictureValue: value });
         this.setState(prevState => ({ page: prevState.page + 1 }));
@@ -52,22 +39,10 @@ class App extends Component {
 
   handleUpdate = async () => {
     this.setState({ status: 'resolvAndPending' });
+    const { pictureValue, page } = this.state;
 
-    const BASE_URL = 'https://pixabay.com/api/';
-    const API_KEY = '29773824-39fd0ee837bb8082420a788ac';
-    const options = {
-      params: {
-        key: API_KEY,
-        q: this.state.pictureValue,
-        image_type: 'photo',
-        orientation: 'horizontal',
-        per_page: 12,
-        page: this.state.page,
-      },
-    };
     try {
-      const responce = await axios.get(`${BASE_URL}`, options);
-      const pictures = await responce.data;
+      const pictures = await picturesApi(pictureValue, page);
 
       if (pictures.hits.length !== 0) {
         this.setState(prevState => ({
@@ -125,12 +100,3 @@ class App extends Component {
 }
 
 export default App;
-
-// (if(this.state.status === 'resolved'){
-//           return(
-//           <>
-//             <ImageGallery pictures={this.state.pictures} />
-//             <Button onClick={this.handleUpdate} />
-//           </>
-//         )
-//         })

@@ -7,12 +7,11 @@ import {
 } from './Searchbar.styled';
 import React, { Component } from 'react';
 
-// const Searchbar = ({ pictureValue, onChange, onSubmit }) =>
-
 class Searchbar extends Component {
   state = {
     inputValue: '',
   };
+
   handleSubmit = e => {
     e.preventDefault();
     this.props.onSubmit(this.state.inputValue);
