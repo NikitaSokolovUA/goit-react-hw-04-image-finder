@@ -10,6 +10,8 @@ class App extends Component {
   state = {
     pictureValue: '',
     pictures: null,
+    totalHits: 0,
+    loadedHits: 0,
     page: 1,
     status: 'idle',
   };
@@ -21,8 +23,9 @@ class App extends Component {
     try {
       const pictures = await picturesApi(value, this.state.page);
 
-      if (pictures.total !== 0) {
-        console.log(pictures.total);
+      if (pictures.totalHits !== 0) {
+        this.loadedPictures(pictures.hits.length);
+        this.setState({ totalHits: pictures.totalHits });
         this.setState({ pictures: pictures.hits });
         this.setState({ pictureValue: value });
         this.setState(prevState => ({ page: prevState.page + 1 }));
@@ -37,6 +40,10 @@ class App extends Component {
     }
   };
 
+  loadedPictures = count => {
+    this.setState(prevState => ({ loadedHits: prevState.loadedHits + count }));
+  };
+
   handleUpdate = async () => {
     this.setState({ status: 'resolvAndPending' });
     const { pictureValue, page } = this.state;
@@ -45,6 +52,7 @@ class App extends Component {
       const pictures = await picturesApi(pictureValue, page);
 
       if (pictures.hits.length !== 0) {
+        this.loadedPictures(pictures.hits.length);
         this.setState(prevState => ({
           pictures: [...prevState.pictures, ...pictures.hits],
         }));
@@ -55,8 +63,17 @@ class App extends Component {
       this.setState({ status: 'rejected' });
       return;
     } catch (error) {
-      console.log(error);
       this.setState({ status: 'rejected' });
+    }
+  };
+
+  renderButtonByTotalHits = () => {
+    if (this.state.loadedHits < this.state.totalHits) {
+      return this.state.status === 'resolvAndPending' ? (
+        <Loader />
+      ) : (
+        <Button onClick={this.handleUpdate} />
+      );
     }
   };
 
@@ -68,11 +85,7 @@ class App extends Component {
       return (
         <>
           <ImageGallery pictures={this.state.pictures} />
-          {this.state.status === 'resolvAndPending' ? (
-            <Loader />
-          ) : (
-            <Button onClick={this.handleUpdate} />
-          )}
+          {this.renderButtonByTotalHits()}
         </>
       );
     }
