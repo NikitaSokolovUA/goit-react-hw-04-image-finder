@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import Modal from 'components/Modal';
 import { Component } from 'react';
 import { GalleryItem, GalleryItemImage } from './ImageGalleryItem.styled';
@@ -38,3 +39,8 @@ class ImageGalleryItem extends Component {
 }
 
 export default ImageGalleryItem;
+
+ImageGalleryItem.proptype = {
+  webformatURL: PropTypes.string.isRequired,
+  largeImageURL: PropTypes.string.isRequired,
+};

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   SearchForm,
   Header,
@@ -49,3 +50,8 @@ class Searchbar extends Component {
 }
 
 export default Searchbar;
+
+Searchbar.proptype = {
+  pictureValue: PropTypes.string.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+};

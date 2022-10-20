@@ -1,5 +1,6 @@
 import ImageGalleryItem from 'components/ImageGalleryItem';
 import React from 'react';
+import PropTypes from 'prop-types';
 import { ImageGallerys } from './ImageGallery.styled';
 
 const buildPicturesOption = pictures => {
@@ -27,3 +28,13 @@ const ImageGallery = ({ pictures }) => {
 };
 
 export default ImageGallery;
+
+ImageGallery.proptype = {
+  pictures: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+    })
+  ),
+};
