@@ -3,121 +3,62 @@ import ImageGallery from './ImageGallery';
 import Searchbar from './Searchbar';
 import Button from './Button';
 import Loader from './Loader';
-import picturesApi from 'api';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { picturesApi } from 'api';
+import { ToastContainer } from 'react-toastify';
+import notification from '../notify';
 
 class App extends Component {
   state = {
     pictureValue: '',
-    pictures: null,
-    totalHits: 0,
-    loadedHits: 0,
+    pictures: [],
     page: 1,
     status: 'idle',
   };
 
-  handleSubmit = async value => {
-    this.setState({ page: 1 });
-    this.setState({ status: 'pending' });
+  async componentDidUpdate(prevProps, prevState) {
+    const { pictureValue, page, pictures } = this.state;
 
-    try {
-      const pictures = await picturesApi(value, this.state.page);
+    if (prevState.pictureValue !== pictureValue || prevState.page !== page) {
+      this.state.pictures.length === 0
+        ? this.setState({ status: 'pending' })
+        : this.setState({ status: 'resolvAndPending' });
 
-      if (pictures.hits.length !== 0) {
-        this.setState({ loadedHits: pictures.hits.length });
-        this.setState({ totalHits: pictures.totalHits });
-        this.setState({ pictures: pictures.hits });
-        this.setState({ pictureValue: value });
-        this.updatePage();
-        this.setState({ status: 'resolved' });
-        return;
-      }
-      this.setState({ status: 'rejected' });
-      return;
-    } catch (error) {
-      this.setState({ status: 'rejected' });
-    }
-  };
+      try {
+        const picturesArray = await picturesApi(pictureValue, page);
 
-  handleUpdate = async () => {
-    this.setState({ status: 'resolvAndPending' });
-    const { pictureValue, page } = this.state;
+        if (picturesArray.length === 0 && pictures.length === 0) {
+          this.setState({ status: 'rejected' });
+          return;
+        }
 
-    try {
-      const pictures = await picturesApi(pictureValue, page);
+        if (pictures.length === 0) {
+          this.setState({ pictures: picturesArray, status: 'resolved' });
+          return;
+        }
 
-      if (pictures.hits.length !== 0) {
-        this.loadedPictures(pictures.hits.length);
         this.setState(prevState => ({
-          pictures: [...prevState.pictures, ...pictures.hits],
+          pictures: [...prevState.pictures, ...picturesArray],
+          status: 'resolved',
         }));
-        this.updatePage();
-        this.setState({ status: 'resolved' });
-        return;
+      } catch (error) {
+        this.setState({ status: 'rejected' });
       }
-      this.setState({ status: 'rejected' });
-      return;
-    } catch (error) {
-      this.setState({ status: 'rejected' });
     }
+  }
+
+  handleSubmit = value => {
+    this.setState({ pictureValue: value, pictures: [] });
   };
 
-  renderButtonByTotalHits = () => {
-    if (this.state.loadedHits < this.state.totalHits) {
-      return this.state.status === 'resolvAndPending' ? (
-        <Loader />
-      ) : (
-        <Button onClick={this.handleUpdate} />
-      );
-    }
-  };
-
-  updatePage = () => {
+  loadMore = () => {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
-  loadedPictures = count => {
-    this.setState(prevState => ({ loadedHits: prevState.loadedHits + count }));
-  };
-
-  notify = () => {
-    toast.error('Sorry we dont find pictures by your Request', {
-      position: 'top-center',
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'colored',
-    });
-  };
-
-  renderByStatus = () => {
-    if (
-      this.state.status === 'resolved' ||
-      this.state.status === 'resolvAndPending'
-    ) {
-      return (
-        <>
-          <ImageGallery pictures={this.state.pictures} />
-          {this.renderButtonByTotalHits()}
-        </>
-      );
-    }
-
-    if (this.state.status === 'pending') {
-      return <Loader />;
-    }
-
-    if (this.state.status === 'rejected') {
-      this.notify();
-      return;
-    }
-  };
-
   render() {
+    if (this.state.status === 'rejected') {
+      notification();
+    }
+
     return (
       <>
         <Searchbar
@@ -125,7 +66,21 @@ class App extends Component {
           onSubmit={this.handleSubmit}
         />
         <ToastContainer />
-        {this.renderByStatus()}
+
+        {this.state.status === 'pending' && <Loader />}
+
+        {(this.state.status === 'resolved' ||
+          this.state.status === 'resolvAndPending') && (
+          <>
+            <ImageGallery pictures={this.state.pictures} />
+
+            {this.state.status === 'resolvAndPending' ? (
+              <Loader />
+            ) : (
+              <Button onClick={this.loadMore} />
+            )}
+          </>
+        )}
       </>
     );
   }
