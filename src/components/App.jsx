@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ImageGallery from './ImageGallery';
 import Searchbar from './Searchbar';
 import Button from './Button';
@@ -7,78 +7,73 @@ import { picturesApi } from 'api';
 import { ToastContainer } from 'react-toastify';
 import notification from '../notify';
 
-class App extends Component {
-  state = {
-    pictureValue: '',
-    pictures: [],
-    page: 1,
-    status: 'idle',
-  };
+export default function App() {
+  const [pictureValue, setPictureValue] = useState('');
+  const [pictures, setPictures] = useState([]);
+  const [page, setPage] = useState(1);
+  const [status, setStatus] = useState('idle');
+  const firstSearch = useRef(true);
 
-  async componentDidUpdate(prevProps, prevState) {
-    const { pictureValue, page, pictures } = this.state;
+  function loadMore() {
+    setPage(prevState => prevState + 1);
+  }
 
-    if (prevState.pictureValue !== pictureValue || prevState.page !== page) {
-      this.state.pictures.length === 0
-        ? this.setState({ status: 'pending' })
-        : this.setState({ status: 'resolvAndPending' });
+  function handleSubmit(value) {
+    setPictureValue(value);
+    setPictures([]);
+    firstSearch.current = true;
+  }
 
-      console.log(
-        this.state.pictures.length === 0
-          ? this.setState({ status: 'pending' })
-          : this.setState({ status: 'resolvAndPending' })
-      );
+  useEffect(() => {
+    if (pictureValue === '') {
+      return;
+    }
+
+    async function fetchData() {
+      firstSearch.current
+        ? setStatus('pending')
+        : setStatus('resolvAndPending');
 
       try {
         const picturesArray = await picturesApi(pictureValue, page);
 
-        if (picturesArray.length === 0 && pictures.length === 0) {
-          this.setState({ status: 'rejected' });
+        if (picturesArray.length === 0 && firstSearch.current) {
+          setStatus('rejected');
           notification();
           return;
         }
 
-        if (pictures.length === 0) {
-          this.setState({ pictures: picturesArray, status: 'resolved' });
+        if (firstSearch.current) {
+          firstSearch.current = false;
+          setPictures(picturesArray);
+          setStatus('resolved');
           return;
         }
 
-        this.setState(prevState => ({
-          pictures: [...prevState.pictures, ...picturesArray],
-          status: 'resolved',
-        }));
+        setPictures(prevState => [...prevState, ...picturesArray]);
+        setStatus('resolved');
+        return;
       } catch (error) {
-        this.setState({ status: 'rejected' });
+        setStatus('rejected');
       }
     }
-  }
 
-  handleSubmit = value => {
-    this.setState({ pictureValue: value, pictures: [] });
-  };
+    fetchData();
+  }, [page, pictureValue]);
 
-  loadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
+  return (
+    <>
+      <Searchbar onSubmit={handleSubmit} />
+      <ToastContainer />
 
-  render() {
-    return (
-      <>
-        <Searchbar onSubmit={this.handleSubmit} />
-        <ToastContainer />
+      {status === 'pending' && <Loader />}
 
-        {this.state.status === 'pending' && <Loader />}
-
-        {(this.state.status === 'resolved' ||
-          this.state.status === 'resolvAndPending') && (
-          <>
-            <ImageGallery pictures={this.state.pictures} />
-            <Button onClick={this.loadMore} status={this.state.status} />
-          </>
-        )}
-      </>
-    );
-  }
+      {(status === 'resolved' || status === 'resolvAndPending') && (
+        <>
+          <ImageGallery pictures={pictures} />
+          <Button onClick={loadMore} status={status} />
+        </>
+      )}
+    </>
+  );
 }
-
-export default App;

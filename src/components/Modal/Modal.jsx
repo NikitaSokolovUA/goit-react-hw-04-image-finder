@@ -1,42 +1,38 @@
 import PropTypes from 'prop-types';
-import { Component } from 'react';
+import { useEffect } from 'react';
 import { Overlay, ModalWindow } from './Modal.styled';
 
-class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.closeModalOnEscPush);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.closeModalOnEscPush);
-  }
-
-  closeModalOnEscPush = e => {
-    const KEY_CODE_ESCAPE = 'Escape';
-
-    if (e.code === KEY_CODE_ESCAPE) {
-      this.props.toggleModal();
-    }
-  };
-
-  closeModalOnClick = e => {
+export default function Modal({ largeImageURL, toggleModal }) {
+  const closeModalOnClick = e => {
     if (e.target === e.currentTarget) {
-      this.props.toggleModal();
+      toggleModal();
     }
   };
 
-  render() {
-    return (
-      <Overlay onClick={this.closeModalOnClick}>
-        <ModalWindow>
-          <img src={this.props.largeImageURL} alt="" />
-        </ModalWindow>
-      </Overlay>
-    );
-  }
-}
+  useEffect(() => {
+    function closeModalOnEscPush(e) {
+      const KEY_CODE_ESCAPE = 'Escape';
 
-export default Modal;
+      if (e.code === KEY_CODE_ESCAPE) {
+        toggleModal();
+      }
+    }
+
+    window.addEventListener('keydown', closeModalOnEscPush);
+
+    return () => {
+      window.removeEventListener('keydown', closeModalOnEscPush);
+    };
+  }, [toggleModal]);
+
+  return (
+    <Overlay onClick={closeModalOnClick}>
+      <ModalWindow>
+        <img src={largeImageURL} alt="" />
+      </ModalWindow>
+    </Overlay>
+  );
+}
 
 Modal.propTypes = {
   toggleModal: PropTypes.func.isRequired,
