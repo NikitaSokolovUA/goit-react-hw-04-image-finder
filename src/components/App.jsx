@@ -12,7 +12,7 @@ export default function App() {
   const [pictures, setPictures] = useState([]);
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('idle');
-  const firstSearch = useRef(true);
+  const isFirstSearch = useRef(true);
 
   function loadMore() {
     setPage(prevState => prevState + 1);
@@ -21,7 +21,7 @@ export default function App() {
   function handleSubmit(value) {
     setPictureValue(value);
     setPictures([]);
-    firstSearch.current = true;
+    isFirstSearch.current = true;
   }
 
   useEffect(() => {
@@ -30,21 +30,21 @@ export default function App() {
     }
 
     async function fetchData() {
-      firstSearch.current
+      isFirstSearch.current
         ? setStatus('pending')
         : setStatus('resolvAndPending');
 
       try {
         const picturesArray = await picturesApi(pictureValue, page);
 
-        if (picturesArray.length === 0 && firstSearch.current) {
+        if (picturesArray.length === 0 && isFirstSearch.current) {
           setStatus('rejected');
           notification();
           return;
         }
 
-        if (firstSearch.current) {
-          firstSearch.current = false;
+        if (isFirstSearch.current) {
+          isFirstSearch.current = false;
           setPictures(picturesArray);
           setStatus('resolved');
           return;

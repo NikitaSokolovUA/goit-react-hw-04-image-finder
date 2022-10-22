@@ -20,9 +20,7 @@ export default function Modal({ largeImageURL, toggleModal }) {
 
     window.addEventListener('keydown', closeModalOnEscPush);
 
-    return () => {
-      window.removeEventListener('keydown', closeModalOnEscPush);
-    };
+    return () => window.removeEventListener('keydown', closeModalOnEscPush);
   }, [toggleModal]);
 
   return (
