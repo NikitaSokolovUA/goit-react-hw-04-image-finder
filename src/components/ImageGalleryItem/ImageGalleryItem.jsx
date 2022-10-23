@@ -27,6 +27,6 @@ export default function ImageGalleryItem({ smallImage, largeImageURL }) {
 }
 
 ImageGalleryItem.propTypes = {
-  webformatURL: PropTypes.string,
-  largeImageURL: PropTypes.string,
+  smallImage: PropTypes.string.isRequired,
+  largeImageURL: PropTypes.string.isRequired,
 };

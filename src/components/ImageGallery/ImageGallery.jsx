@@ -21,10 +21,10 @@ export default ImageGallery;
 
 ImageGallery.propTypes = {
   pictures: PropTypes.arrayOf(
-    PropTypes.shape({
+    PropTypes.exact({
       id: PropTypes.number.isRequired,
-      webformatURL: PropTypes.string,
-      largeImageURL: PropTypes.string,
+      webformatURL: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
     })
   ),
 };

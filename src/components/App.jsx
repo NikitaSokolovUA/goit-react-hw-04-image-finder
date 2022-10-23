@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import ImageGallery from './ImageGallery';
 import Searchbar from './Searchbar';
 import Button from './Button';
@@ -12,7 +12,6 @@ export default function App() {
   const [pictures, setPictures] = useState([]);
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('idle');
-  const isFirstSearch = useRef(true);
 
   function loadMore() {
     setPage(prevState => prevState + 1);
@@ -21,7 +20,6 @@ export default function App() {
   function handleSubmit(value) {
     setPictureValue(value);
     setPictures([]);
-    isFirstSearch.current = true;
   }
 
   useEffect(() => {
@@ -30,21 +28,18 @@ export default function App() {
     }
 
     async function fetchData() {
-      isFirstSearch.current
-        ? setStatus('pending')
-        : setStatus('resolvAndPending');
+      page === 1 ? setStatus('pending') : setStatus('resolvAndPending');
 
       try {
         const picturesArray = await picturesApi(pictureValue, page);
 
-        if (picturesArray.length === 0 && isFirstSearch.current) {
+        if (picturesArray.length === 0) {
           setStatus('rejected');
           notification();
           return;
         }
 
-        if (isFirstSearch.current) {
-          isFirstSearch.current = false;
+        if (page === 1) {
           setPictures(picturesArray);
           setStatus('resolved');
           return;
